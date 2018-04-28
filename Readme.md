@@ -6,6 +6,9 @@ Scenario:
 =========
 User has a web application and some functional tests for it. He makes a change to razor pages file, saves it and runs the tests again.
 
+**NOTE**: The tests in this scenario create & dispose the TestServer for every test. i.e 100 tests here create 100 instances of it. The
+memory issue does NOT repro if the TestServer is created only once and shared by all tests, which is more common. You can checkout the branch 'WithTextFixture' to test that scenario too.
+
 Repro steps:
 ===========
 1. Open the FileSystemWatcherRepro.sln
