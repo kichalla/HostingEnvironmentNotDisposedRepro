@@ -18,7 +18,7 @@ namespace WebApp.Test
         public LeakReproTest()
         {
             var builder = new WebHostBuilder()
-                .UseContentRoot(@"C:\Users\kichalla\source\repos\FileSystemWatcherRepro\WebApp")
+                .UseContentRoot(@"..\..\..\..\WebApp") // WebApp.Test\bin\release\netcoreapp2.1\WebApp.Test.dll
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     HostingEnvironment = hostingContext.HostingEnvironment;
