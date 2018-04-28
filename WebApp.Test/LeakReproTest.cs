@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -19,7 +21,7 @@ namespace WebApp.Test
         public LeakReproTest()
         {
             var builder = new WebHostBuilder()
-                .UseContentRoot(@"..\..\..\..\WebApp") // WebApp.Test\bin\release\netcoreapp2.1\WebApp.Test.dll
+                .UseContentRoot(GetWebApplicationRootFolder())
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     HostingEnvironment = hostingContext.HostingEnvironment;
@@ -68,6 +70,20 @@ namespace WebApp.Test
             //}
 
             _testServer?.Dispose();
+        }
+
+        private string GetWebApplicationRootFolder()
+        {
+            // FileSystemWatcher\
+            //  - WebApp\
+            //  - WebApp.Test\bin\release\netcoreapp2.1\WebApp.Test.dll
+            var currentLocation = Assembly.GetExecutingAssembly().Location;
+            var currentDir = new FileInfo(currentLocation).Directory;
+            while (currentDir.GetFiles($"{nameof(FileSystemWatcher)}.sln").Length > 0)
+            {
+                currentDir = currentDir.Parent;
+            }
+            return Path.Combine(currentDir.FullName, "WebApp");
         }
     }
 }
