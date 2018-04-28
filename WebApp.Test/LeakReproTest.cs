@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,21 +30,20 @@ namespace WebApp.Test
             Client = TestServer.CreateClient();
         }
 
-        public static TheoryData<int> Test1Data
+        // Create fake tests
+        public static IEnumerable<object[]> FakeTests
         {
             get
             {
-                var d = new TheoryData<int>();
-                for (var i = 0; i < 100; i++)
-                {
-                    d.Add(i);
-                }
-                return d;
+                return Enumerable
+                    .Range(0, 100)
+                    .Select(i => new object[] { i });
             }
         }
+
         [Theory]
-        [MemberData(nameof(Test1Data))]
-        public async Task Test1(int i)
+        [MemberData(nameof(FakeTests))]
+        public async Task Test(int testIteration)
         {
             var response = await Client.GetAsync("/Foo");
 
@@ -54,7 +51,6 @@ namespace WebApp.Test
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains("Foo", content);
-            //Assert.Contains("Sample pages using ASP.NET Core MVC", content);
         }
 
         public void Dispose()
