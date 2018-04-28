@@ -74,13 +74,15 @@ namespace WebApp.Test
 
         private string GetWebApplicationRootFolder()
         {
-            // FileSystemWatcher\
+            // FileSystemWatcherRepro\
+            //  - FileSystemWatcherRepro.sln
             //  - WebApp\
             //  - WebApp.Test\bin\release\netcoreapp2.1\WebApp.Test.dll
             var currentLocation = Assembly.GetExecutingAssembly().Location;
             var currentDir = new FileInfo(currentLocation).Directory;
-            while (currentDir.GetFiles($"{nameof(FileSystemWatcher)}.sln").Length > 0)
+            while (currentDir.GetFiles("FileSystemWatcherRepro.sln").Length == 0)
             {
+                Console.WriteLine(currentDir.FullName);
                 currentDir = currentDir.Parent;
             }
             return Path.Combine(currentDir.FullName, "WebApp");
