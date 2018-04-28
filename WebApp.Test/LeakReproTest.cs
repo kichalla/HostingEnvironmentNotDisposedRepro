@@ -12,10 +12,8 @@ namespace WebApp.Test
 {
     public class LeakReproTest : IDisposable
     {
-        public IHostingEnvironment HostingEnvironment { get; private set; }
-
-        public TestServer TestServer { get; }
-        public HttpClient Client { get; }
+        private readonly TestServer _testServer;
+        private readonly HttpClient _client;
 
         public LeakReproTest()
         {
@@ -26,9 +24,11 @@ namespace WebApp.Test
                     HostingEnvironment = hostingContext.HostingEnvironment;
                 })
                 .UseStartup<WebApp.Startup>();
-            TestServer = new TestServer(builder);
-            Client = TestServer.CreateClient();
+            _testServer = new TestServer(builder);
+            _client = _testServer.CreateClient();
         }
+
+        private IHostingEnvironment HostingEnvironment { get; set; }
 
         // Create fake tests
         public static IEnumerable<object[]> FakeTests
@@ -45,11 +45,12 @@ namespace WebApp.Test
         [MemberData(nameof(FakeTests))]
         public async Task Test(int testIteration)
         {
-            var response = await Client.GetAsync("/Foo");
+            // Arrange & Act
+            var response = await _client.GetAsync("/Foo");
 
-            var content = await response.Content.ReadAsStringAsync();
-
+            //Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var content = await response.Content.ReadAsStringAsync();
             Assert.Contains("Foo", content);
         }
 
@@ -65,7 +66,7 @@ namespace WebApp.Test
             //    webRootPhysicalFileProvider.Dispose();
             //}
 
-            TestServer?.Dispose();
+            _testServer?.Dispose();
         }
     }
 }
