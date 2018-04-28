@@ -13,25 +13,14 @@ using Xunit;
 
 namespace WebApp.Test
 {
-    public class LeakReproTest : IDisposable
+    public class LeakReproTest : IClassFixture<WebAppTestFixture>
     {
-        private readonly TestServer _testServer;
         private readonly HttpClient _client;
 
-        public LeakReproTest()
+        public LeakReproTest(WebAppTestFixture testFixture)
         {
-            var builder = new WebHostBuilder()
-                .UseContentRoot(GetWebApplicationRootFolder())
-                .ConfigureAppConfiguration((hostingContext, config) =>
-                {
-                    HostingEnvironment = hostingContext.HostingEnvironment;
-                })
-                .UseStartup<WebApp.Startup>();
-            _testServer = new TestServer(builder);
-            _client = _testServer.CreateClient();
+            _client = testFixture.Client;
         }
-
-        private IHostingEnvironment HostingEnvironment { get; set; }
 
         // Create fake tests
         public static IEnumerable<object[]> FakeTests
@@ -55,37 +44,6 @@ namespace WebApp.Test
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var content = await response.Content.ReadAsStringAsync();
             Assert.Contains("Foo", content);
-        }
-
-        public void Dispose()
-        {
-            //if (HostingEnvironment?.ContentRootFileProvider is PhysicalFileProvider contentPhysicalFileProvider)
-            //{
-            //    contentPhysicalFileProvider.Dispose();
-            //}
-
-            //if (HostingEnvironment?.WebRootFileProvider is PhysicalFileProvider webRootPhysicalFileProvider)
-            //{
-            //    webRootPhysicalFileProvider.Dispose();
-            //}
-
-            _testServer?.Dispose();
-        }
-
-        private string GetWebApplicationRootFolder()
-        {
-            // FileSystemWatcherRepro\
-            //  - FileSystemWatcherRepro.sln
-            //  - WebApp\
-            //  - WebApp.Test\bin\release\netcoreapp2.1\WebApp.Test.dll
-            var currentLocation = Assembly.GetExecutingAssembly().Location;
-            var currentDir = new FileInfo(currentLocation).Directory;
-            while (currentDir.GetFiles("FileSystemWatcherRepro.sln").Length == 0)
-            {
-                Console.WriteLine(currentDir.FullName);
-                currentDir = currentDir.Parent;
-            }
-            return Path.Combine(currentDir.FullName, "WebApp");
         }
     }
 }
